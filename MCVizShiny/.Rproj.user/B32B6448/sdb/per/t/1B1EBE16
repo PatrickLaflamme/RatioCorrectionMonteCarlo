@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "\n# This is the server logic for a Shiny web application.\n# You can find out more about building applications with Shiny here:\n#\n# http://shiny.rstudio.com\n#\n\nlibrary(shiny)\n\nload('MCresults-Labelled.RData')\nsource('Monte Carlo Basic Functions.R')\n\n\nfselect_in <- function(x, ref, d = 10){\n  round(x, digits=d) %in% round(ref, digits=d)\n}\n\nshinyServer(function(input, output) {\n  \n  output$distPlot <- renderPlot({\n    \n    if(input$datatype=='Skewness-Pop'){\n      load('MCresults-Skewness.RData')\n      dimnames(output) <- dimnames(newOutput)\n      newOutput <- output\n      ERtick <- pretty(newOutput, n=5)\n      cont <- NA\n    }\n    if(input$datatype=='Skewness-SampDist'){\n      load('MCresults-Skewness-SampDist.RData')\n      dimnames(output) <- dimnames(newOutput)\n      newOutput <- output\n      ERtick <- pretty(newOutput, n=5)\n      cont <- NA\n    }\n    else if(input$datatype=='Actual Alpha Values'|input$datatype=='Alphas and SampDist Skew'){\n      load('MCresults-Labelled.RData')\n      ERtick <- c(0.005, 0.01,0.025,0.05,0.1,0.2,0.4,0.8)\n    }\n    \n    requestedcor <- fselect_in(as.numeric(dimnames(newOutput)[[2]]),input$correlation, d=2)\n    requestedmean <- fselect_in(as.numeric(dimnames(newOutput)[[3]]),input$slopemean, d=2)\n    \n    if(all(ERtick == c(0.005, 0.01,0.025,0.05,0.1,0.2,0.4,0.8))){\n      cont <- cont <- unname(newOutput[input$method,dimnames(newOutput)[[2]][requestedcor],dimnames(newOutput)[[3]][requestedmean],,])\n    }\n    \n    MCfilled.contour(x=seq(from=0,to=10,length.out=20),\n                     y=seq(from=0,to=1,length.out=20),\n                     z=unname(newOutput[input$method,dimnames(newOutput)[[2]][requestedcor],dimnames(newOutput)[[3]][requestedmean],,]),\n                     zlim = c(min(newOutput),max(newOutput)),\n                     contourz = cont,\n                     color.palette = MCrainbow,\n                     nlevels = 100,\n                     xlab = 'Effect Variance',\n                     ylab = 'Slope Variance',\n                     main = paste(input$method,input$correlation,input$slopemean,'alpha = 0.05', sep=' '),\n                     key.axes = axis(4, at = c(ERtick, round(max(newOutput), 3), label = c(ERtick, round(max(newOutput), 3)))),\n                     key.title = expression(paste('Actual ', alpha, sep = '')))\n\n  })\n  \n  output$secPlot <- renderPlot({\n    \n    if(input$datatype=='Alphas and SampDist Skew'){\n      load('MCresults-Skewness-SampDist.RData')\n      dimnames(output) <- dimnames(newOutput)\n      skewtick <- pretty(output, n=5)\n    }\n    else{return(NULL)}\n    \n    requestedcor <- fselect_in(as.numeric(dimnames(output)[[2]]),input$correlation, d=2)\n    requestedmean <- fselect_in(as.numeric(dimnames(output)[[3]]),input$slopemean, d=2)\n    \n    MCfilled.contour(x=seq(from=0,to=10,length.out=20),\n                     y=seq(from=0,to=1,length.out=20),\n                     z=unname(output[input$method,dimnames(output)[[2]][requestedcor],dimnames(output)[[3]][requestedmean],,]),\n                     zlim = c(min(output),max(output)),\n                     color.palette = MCrainbow,\n                     nlevels = 100,\n                     xlab = 'Effect Variance',\n                     ylab = 'Slope Variance',\n                     main = paste(input$method,input$correlation,input$slopemean,'alpha = 0.05', sep=' '),\n                     key.axes = axis(4, at = c(skewtick, round(max(output), 3), label = c(skewtick, round(max(output), 3)))),\n                     key.title = expression(paste('Actual ', alpha, sep = '')))\n  })\n\n})\n",
+    "created" : 1472234828077.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4109268319",
+    "id" : "1B1EBE16",
+    "lastKnownWriteTime" : 1473785635,
+    "last_content_update" : 1473785635405,
+    "path" : "~/Dropbox/MCratio/MCVizShiny/server.R",
+    "project_path" : "server.R",
+    "properties" : {
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

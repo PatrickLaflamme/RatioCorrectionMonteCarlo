@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "library(Rmpi)\nlibrary(mnormt)\n\nmpi.setup.rngstream(12345)\n\nsource('Monte Carlo Basic Functions.R')\n\nmpi.bcast.Robj2slave(all=TRUE)\n\n\nstart <- proc.time()\nprint(runTest(1,1,1,0,1))\nprint(proc.time()-start)\n\nspaceDims <- c(3,20,20,10,8) #3 methods x 20 slopevariances x 20 effect variances x 10 slope means x 8 correlations\n\n#slope means 0.55 - 1.45 by 0.1\n#slope variance 0 - 1 by 0.05\n#effect variance 0 - 10 by 0.5\n#correlation 0-0.4 by 0.05\n\nstarts <- c(0.05,0.5,0.55,0)\n\nends <- c(1,10,1.45,0.4)\n\nspacelist <- array( dim = c(prod(spaceDims),length(spaceDims)))\n\nfor(i in 2:length(spaceDims)){\n  \n  curlist <- seq(from = starts[i-1], to = ends[i-1], length.out = spaceDims[i])\n  \n  spacelist[,i-1] <- rep(curlist, times=prod(spaceDims[-c(1,i:length(spaceDims))]), each = prod(spaceDims[-(1:i)]))\n  \n}\n\nspacelist <- split(spacelist, seq(nrow(spacelist)))\n\n\noutputSpaceDims <- c(3,8,10,20,20)\n\n##    spaceDims ::  dimensions of the parameter space that will be explored (range * resolution for each dim)\n\noutput <- array(dim = outputSpaceDims)\n\nj<-1\ni<-1\nprint(array(unlist(mpi.apply(spacelist[1600*(i-1)+(j-1)*80+1:80], function(e){ return(runTest(e[3],e[1],e[2], e[4]))})), dim=c(3,8,10)))\nprint(spacelist[1600*(i-1)+(j-1)*80+1:80])\n\nfor(slopevar in 1:20){\n  for(effectvar in 1:20){\n    output[,,,effectvar,slopevar] <- array(unlist(mpi.apply(spacelist[1600*(slopevar-1)+(effectvar-1)*80+1:80], function(e){ return(runTest(e[3],e[1],e[2], e[4]))})), dim=c(3,8,10))\n    \n    print(1600*(slopevar-1)+(effectvar)*80)\n    \n  }\n}\n\nsave(output, file='MCresults.RData')\n\nmpi.quit(save='yes')\n",
+    "created" : 1471643929562.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2802106299",
+    "id" : "2E24F970",
+    "lastKnownWriteTime" : 1478125786,
+    "last_content_update" : 1478125786682,
+    "path" : "~/Dropbox/MCratio/MCratioAnalysis/MCImplimentation.R",
+    "project_path" : "MCImplimentation.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "#library(R.matlab)\n\n#writeMat('MCresults.mat', MCresults = output)\n\nsystem('mkdir MCresultPlots')\n\n\neffectvarRange <- seq(from=0, to=10, length.out = 20)\nslopevarRange <- seq(from=0, to=1, length.out = 20)\nERtick <- c(0.005, 0.01,0.025,0.05,0.1,0.2,0.4,0.8)\n\n\n\nfor(i in dimnames(output)[[1]]){\n  \n  system(paste('mkdir MCresultPlots/', i, sep=''))\n  \n  for(j in dimnames(output)[[2]]){\n    \n    system(paste('mkdir MCresultPlots/', i, '/', j, sep=''))\n    \n    for(k in dimnames(output)[[3]]){\n      \n      folder <- paste('MCresultPlots/', i, '/', j, '/',  sep='')\n      \n      pdf(file=paste(folder, k,'.pdf',sep=''), width = 10, height=10)\n      MCfilled.contour(x=effectvarRange,\n                       y=slopevarRange,\n                       z=unname(output[i,j,k,,]),\n                       zlim = c(0,0.1),\n                       contourz = unname(output[i,j,k,,]),\n                       color.palette = MCrainbow,\n                       nlevels = 100,\n                       xlab = 'Effect Variance',\n                       ylab = 'Slope Variance',\n                       main = paste(i,j,k,expression(alpha),'= 0.05', sep=' '),\n                       key.axes = axis(4, at = ERtick, label = ERtick),\n                       key.title = expression(paste('Actual ', alpha, sep = ''))\n                      )\n      dev.off()\n    }\n    \n  }\n  \n}\n",
+    "created" : 1472231427602.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "958157721",
+    "id" : "8A835D69",
+    "lastKnownWriteTime" : 1472238313,
+    "last_content_update" : 1472238313107,
+    "path" : "~/Dropbox/MCratio/MCratioAnalysis/VisualizeAllData.R",
+    "project_path" : "VisualizeAllData.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

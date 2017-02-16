@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "\n\nval0 <- runSkew(5,0.9, 0.2, 1, 0, test=F)\n#test0 <- runTest(5,0.9, 0.2, 1, 0)\n\npar(mfrow=c(2,1), oma=c(0, 0, 2, 0))\nhist(apply(val0[[2]],2,var),breaks = seq(0,1000,by = 0.1), xlim = c(0,50),main = \"ZeroVar\", xlab = 'Variance')\nhist(apply(val0[[3]],2,var),breaks = seq(0,1000,by = 0.1), xlim = c(0,50),main = \"Taylor\", xlab = 'Variance')\ntitle(main = \"Histograms: E=5, S=0.9, varE=1, varS=0.2, r=0\",outer=T)\n\nval0.4 <- runSkew(5,0.9, 0.2, 1, 0.4, test=F)\n#test0.4 <- runTest(5,0.9, 0.2, 1, 0.4)\n\npar(mfrow=c(2,1), oma=c(0, 0, 2, 0))\nhist(apply(val0.4[[2]],2,var),breaks = seq(0,1000,by = 0.1), xlim = c(0,50),main = \"ZeroVar\", xlab = 'Variance')\nhist(apply(val0.4[[3]],2,var),breaks = seq(0,1000,by = 0.1), xlim = c(0,50),main = \"Taylor\", xlab = 'Variance')\ntitle(main = \"Histograms: E=5, S=0.9, varE=1, varS=0.2, r=0.4\",outer=T)\n\n",
+    "created" : 1479416192223.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4268453494",
+    "id" : "5761E456",
+    "lastKnownWriteTime" : 1479430248,
+    "last_content_update" : 1479430248145,
+    "path" : "~/Dropbox/MCratio/MCratioAnalysis/Visualizing Variance difference.R",
+    "project_path" : "Visualizing Variance difference.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
