@@ -10,6 +10,9 @@ if(length(args) > 0){
   # Where to save the data?
   path <- grep("--path", args) + 1
   
+  # Where to save the data?
+  n_samples <- grep("--n_samples", args) + 1
+  
   if( run_mpi ){
     library(Rmpi)
     mpi.setup.rngstream(12345)
@@ -20,6 +23,11 @@ if(length(args) > 0){
     path <- args[path]
   } else {
     path <- '~/Desktop/Test/'
+  }
+  if( length(n_samples) ) {
+    n_samples <- args[n_samples]
+  } else {
+    stop("n_samples must be provided using --n_samples [integer]")
   }
 } else {
   
@@ -43,12 +51,14 @@ Datagen <- function(n_samples, sample_size, groups,mean,vars, seed){
   #now change it to a more intelligible sample_size x groups x n_samples array
   sample <- aperm(sample, c(1,3,2))
   
+  sample[,1,] <- sample[,1,]*sample[,2,]
+  
   return(sample)
   
 }
 
 # create data and save to file function
-gen_data_file <- function(varVector, dirpath, n_samples=10, sample_size=30, seed = 1234){
+gen_data_file <- function(varVector, dirpath, n_samples=1000, sample_size=30, seed = 1234){
   
   HiddenEffect <- varVector[1]
   EffectVar <- varVector[2]
@@ -61,7 +71,7 @@ gen_data_file <- function(varVector, dirpath, n_samples=10, sample_size=30, seed
 }
 
 # declare the ranges of data.
-HiddenEffect <- seq(0,10,by=10)
+HiddenEffect <- c(1,2,3)
 EffectVar <- c(0.1,0.5)
 slope <-seq(0.6,1.4)
 slopeVar <- c(0.01,0.05)

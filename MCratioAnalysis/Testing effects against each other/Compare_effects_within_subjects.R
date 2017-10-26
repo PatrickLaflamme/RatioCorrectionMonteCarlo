@@ -1,6 +1,8 @@
 #!/usr/bin/env Rscript
 args = commandArgs(trailingOnly=TRUE)
 
+#Read through for code errors like the t-values error.
+
 #check what the commandArgs are requesting
 if(length(args) > 0){
   
@@ -32,7 +34,7 @@ if(length(args) > 0){
 } else {
   run_mpi <- 0
   path <- '~/Desktop/Test/'
-  condition <- 4
+  condition <- 2
 }
 
 library(moments)
@@ -71,7 +73,7 @@ genIndex <- function(data, condition){
 }
 
 
-test_between_datasets <- function(datapaths, condition){
+test_between_datasets <- function(datapath, condition){
   # Function that takes dataset filepaths as input, and returns:
   # - the skew of the difference
   # - the mean of the difference
@@ -84,20 +86,24 @@ test_between_datasets <- function(datapaths, condition){
   # datapaths:    A vector of 2 filepaths for the two datapaths.
   # condition:    Metod to use to generate participants' index scores.
   
-  infoA <- strsplit(basename(datapaths[1]),"_")[[1]]
-  infoB <- strsplit(basename(datapaths[2]),"_")[[1]]
+  info <- strsplit(basename(datapath),"_")[[1]]
   
-  effectA <- as.numeric(infoA[1])
-  effectB <- as.numeric(infoB[1])
+  effectA <- as.numeric(info[1])
+  effectB <- as.numeric(info[5])
   
-  varEffectA <- as.numeric(infoA[2])
-  varEffectB <- as.numeric(infoB[2])
+  varEffectA <- as.numeric(info[2])
+  varEffectB <- as.numeric(info[6])
   
-  slopeA <- as.numeric(infoA[3])
-  slopeB <- as.numeric(infoB[3])
+  slopeA <- as.numeric(info[3])
+  slopeB <- as.numeric(info[7])
   
-  varSlopeA <- as.numeric(strsplit(infoA[4], ".rds")[[1]][1])
-  varSlopeB <- as.numeric(strsplit(infoB[4], ".rds")[[1]][1])
+  varSlopeA <- as.numeric(info[4])
+  varSlopeB <- as.numeric(info[8])
+  
+  HiddenEffectscorrelation <- as.numeric(info[9])
+  slopescorrelation <- as.numeric(info[10])
+  effectSlopecorrelationA <- as.numeric(info[11])
+  effectSlopecorrelationB <- as.numeric(strsplit(info[12], ".rds")[[1]][1])
   
   effectCoeffVarA <- varEffectA/effectA
   effectCoeffVarB <- varEffectB/effectB
@@ -107,13 +113,15 @@ test_between_datasets <- function(datapaths, condition){
   
   effectDiff <- effectA - effectB
   
-  # Load and prepare dataA
-  dataA <- readRDS(datapaths[1])
-  indexA <- genIndex(dataA, condition)
+  obsEffectA <- effectA/slopeA
+  obsEffectB <- effectB/slopeB
   
-  # Load and prepare dataA
-  dataB <- readRDS(datapaths[2])
-  indexB <- genIndex(dataB, condition)
+  obsEffectDiff <- obsEffectA - obsEffectB
+  
+  # Load and prepare data
+  data <- readRDS(datapath)
+  indexA <- genIndex(data[,c(1,2),], condition)
+  indexB <- genIndex(data[,c(3,4),], condition)
   
   # Create sampling distributions for indexes
   meanDiffs <- colMeans(indexA) - colMeans(indexB)
@@ -125,39 +133,37 @@ test_between_datasets <- function(datapaths, condition){
   
   sum_vars <- apply(indexA,2,var) + apply(indexB,2,var)
   
-  tValues <- meanDiffs/ (sapply(sum_vars,sqrt)/dim(indexA)[2])
+  tValues <- meanDiffs/ (sapply(sum_vars/dim(indexA)[1],sqrt))
   
-  pValues <- sapply(tValues, pt, df = dim(indexA)[2])
+  pValues <- sapply(-abs(tValues), pt, df = dim(indexA)[1] - 2)
   
   
   if(effectDiff==0){
-  error <- sum(pValues<0.05)/dim(indexA)[2]
-  errorType <- "Alpha"
+    error <- sum(pValues<0.05)/dim(indexA)[2]
+    errorType <- 0
   } else {
-  error <- sum(pValues>=0.05)/dim(indexA)[2]
-  errorType <- "Beta"
+    error <- sum(pValues>=0.05)/dim(indexA)[2]
+    errorType <- 1
   }
   
-  return(c(effectDiff, effectCoeffVarA, slopeCoeffVarA,effectCoeffVarB, slopeCoeffVarB, skewDiffs, kurtosisDiffs, errorType, error))
+  return(c(effectDiff, obsEffectDiff, obsEffectA, effectCoeffVarA, slopeCoeffVarA, obsEffectB, effectCoeffVarB, slopeCoeffVarB,  HiddenEffectscorrelation, slopescorrelation, effectSlopecorrelationA, effectSlopecorrelationB, skewDiffs, kurtosisDiffs, errorType, error))
 }
 
 # List files provided in the 
 files <- list.files(path, pattern = ".rds", full.names = T, include.dirs = F)
 
-# get a matrix of all unique comparisons between datasets.
-all_comparisons <- combn(files, m = 2)
-
 # If we're running with MPI, apply in parallel, otherwise apply in serial
 if(run_mpi){
-  output <- mpi.parApply(all_comparisons, 2, test_between_datasets, condition = condition)
+  output <- mpi.parApply(files, 2, test_between_datasets, condition = condition)
 } else {
-  output <- apply(all_comparisons, 2, test_between_datasets, condition = condition)
+  output <- sapply(files, test_between_datasets, condition = condition, simplify = T, USE.NAMES = F)
 }
 
-output <- data.frame(t(output))
+output <- data.frame(t(output), stringsAsFactors = F)
 
-colnames(output) <- c("Effect Difference", "Dataset 1 effect coefficient of variance", "Dataset 1 slope coefficient of variance", "Dataset 2 effect coefficient of variance","Dataset 2 slope coefficient of variance", "Skewness", "Kurtosis", "Error Type", "Error")
+colnames(output) <- c("Effect Difference","Expected Observed Effect Difference", "Observed Effect 1", "Dataset 1 effect coefficient of variance", "Dataset 1 slope coefficient of variance", "Observed Effect 2", "Dataset 2 effect coefficient of variance","Dataset 2 slope coefficient of variance", "Hidden Effect Correlation", "Slopes correlation", "Hidden Effect-Slope correlation dataset 1", "Hidden Effect-Slope correlation dataset 2", "Skewness", "Kurtosis", "Error Type", "Error")
+output$`Error Type` <- factor(output$`Error Type`, labels = c("Alpha","Beta"))
 
 dir.create(paste(path,"output", sep='/'), showWarnings = F)
 
-saveRDS(output, file=paste0(path, "/output/between_subjects_t_condition_", condition, ".rds"))
+saveRDS(output, file=paste0(path, "/output/within_subjects_t_condition_", condition, ".rds"))

@@ -44,12 +44,12 @@ output <- array(dim = outputSpaceDims)
 
 j<-1
 i<-1
-print(array(unlist(mpi.apply(spacelist[1600*(i-1)+(j-1)*80+1:80], function(e){ return(runTest(e[3],e[1],e[2], e[4]))})), dim=c(3,8,10)))
+print(array(unlist(mpi.apply(spacelist[1600*(i-1)+(j-1)*80+1:80], function(e){ return(runTest(5,e[3],e[1],e[2], e[4]))})), dim=c(3,8,10)))
 print(spacelist[1600*(i-1)+(j-1)*80+1:80])
 
 for(slopevar in 1:20){
   for(effectvar in 1:20){
-    output[,,,effectvar,slopevar] <- array(unlist(mpi.apply(spacelist[1600*(slopevar-1)+(effectvar-1)*80+1:80], function(e){ return(runTest(e[3],e[1],e[2], e[4]))})), dim=c(3,8,10))
+    output[,,,effectvar,slopevar] <- array(unlist(mpi.apply(spacelist[1600*(slopevar-1)+(effectvar-1)*80+1:80], function(e){ return(runTest(5, e[3],e[1],e[2], e[4]))})), dim=c(3,8,10))
     
     print(1600*(slopevar-1)+(effectvar)*80)
     
