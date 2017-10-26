@@ -59,7 +59,7 @@ Datagen <- function(n_samples, sample_size, means,varcov, seed){
     set.seed(seed)
   }
   
-  sample <- array(rmnorm(n = n_samples*sample_size,mean = means, varcov = varcov), c(sample_size, n_samples, length(means)))
+  sample <- array(rmnorm(n_samples*sample_size,means,varcov), c(sample_size, n_samples, length(means)))
   
   #now change it to a more intelligible sample_size x groups x n_samples array
   sample <- aperm(sample, c(1,3,2))
@@ -69,7 +69,7 @@ Datagen <- function(n_samples, sample_size, means,varcov, seed){
 }
 
 # create data and save to file function
-gen_data_file <- function(varVector, dirpath, n_samples=n_samples, sample_size=30, seed = 1234){
+gen_data_file <- function(varVector, dirpath, n_samples, sample_size=30, seed = 1234){
   
   HiddenEffectA <- varVector[1]
   HiddenEffectB <- varVector[2]
@@ -84,19 +84,19 @@ gen_data_file <- function(varVector, dirpath, n_samples=n_samples, sample_size=3
   effectSlopecorrelationA <- varVector[11]
   effectSlopecorrelationB <- varVector[12]
   
-  varcov <- diag(c(EffectVarA, EffectVarB,slopeVarA,slopeVarB))
+  varcov <- diag(c(EffectVarA, slopeVarA,EffectVarB,slopeVarB))
   
-  varcov[1,2] <- HiddenEffectscorrelation * sqrt(EffectVarA * EffectVarB)
-  varcov[2,1] <- HiddenEffectscorrelation * sqrt(EffectVarA * EffectVarB)
+  varcov[1,3] <- HiddenEffectscorrelation * sqrt(EffectVarA * EffectVarB)
+  varcov[3,1] <- HiddenEffectscorrelation * sqrt(EffectVarA * EffectVarB)
   
-  varcov[1,3] <- effectSlopecorrelationA * sqrt(EffectVarA * slopeVarA)
-  varcov[3,1] <- effectSlopecorrelationA * sqrt(EffectVarA * slopeVarA)
+  varcov[1,2] <- effectSlopecorrelationA * sqrt(EffectVarA * slopeVarA)
+  varcov[2,1] <- effectSlopecorrelationA * sqrt(EffectVarA * slopeVarA)
   
-  varcov[2,4] <- effectSlopecorrelationB * sqrt(EffectVarB * slopeVarB)
-  varcov[4,2] <- effectSlopecorrelationB * sqrt(EffectVarB * slopeVarB)
+  varcov[3,4] <- effectSlopecorrelationB * sqrt(EffectVarB * slopeVarB)
+  varcov[4,3] <- effectSlopecorrelationB * sqrt(EffectVarB * slopeVarB)
   
-  varcov[3,4] <- slopescorrelation * sqrt(slopeVarA * slopeVarB)
-  varcov[4,3] <- slopescorrelation * sqrt(slopeVarA * slopeVarB)
+  varcov[2,4] <- slopescorrelation * sqrt(slopeVarA * slopeVarB)
+  varcov[4,2] <- slopescorrelation * sqrt(slopeVarA * slopeVarB)
   
   data <- Datagen(n_samples, sample_size, means=c(HiddenEffectA, slopeA, HiddenEffectB, slopeB), varcov = varcov, seed)
   
@@ -117,10 +117,10 @@ varCombinations <- expand.grid(HiddenEffect, HiddenEffect, EffectVar, EffectVar,
 
 # If we're running with MPI, apply in parallel, otherwise apply in serial
 if(run_mpi){
-  success <- mpi.parApply(varCombinations, 1, gen_data_file, dirpath=path, job.num=ns)
+  success <- mpi.parApply(varCombinations, 1, gen_data_file, dirpath=path, n_samples=n_samples)
   mpi.close.Rslaves() 
   mpi.quit()
 } else {
-  success <- apply(varCombinations, 1, gen_data_file, dirpath=path)
+  success <- apply(varCombinations, 1, gen_data_file, dirpath=path, n_samples=n_samples)
 }
 
