@@ -26,6 +26,8 @@ if(length(args) > 0){
         .Call("mpi_finalize") 
       } 
     }
+    
+    mpi.spawn.Rslaves()
   } 
   
   if( length(path) ) {
@@ -66,7 +68,7 @@ Datagen <- function(n_samples, sample_size, means,varcov, seed){
 }
 
 # create data and save to file function
-gen_data_file <- function(varVector, dirpath, n_samples=10000, sample_size=30, seed = 1234){
+gen_data_file <- function(varVector, dirpath, n_samples=n_samples, sample_size=30, seed = 1234){
   
   HiddenEffectA <- varVector[1]
   HiddenEffectB <- varVector[2]
