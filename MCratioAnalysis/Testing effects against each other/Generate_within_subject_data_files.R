@@ -14,10 +14,10 @@ if(length(args) > 0){
   n_samples <- grep("--n_samples", args) + 1
   
   # get the number of cores
-  cores <- as.numeric(grep("--cores", args) + 1)
+  cores <- grep("--cores", args) + 1
   
   if( length(cores) ) {
-    cores <- args[cores]
+    cores <- as.numeric(args[cores])
   } else {
     stop("cores must be provided using --cores [integer]")
   }
