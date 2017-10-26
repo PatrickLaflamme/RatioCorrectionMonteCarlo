@@ -27,6 +27,9 @@ if(length(args) > 0){
         .Call("mpi_finalize") 
       } 
     }
+    # initialize an Rmpi environment
+    ns <- mpi.universe.size() - 1
+    mpi.spawn.Rslaves(nslaves=ns)
   } 
   
   if( length(path) ) {

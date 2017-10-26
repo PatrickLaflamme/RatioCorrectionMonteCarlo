@@ -26,7 +26,9 @@ if(length(args) > 0){
         .Call("mpi_finalize") 
       } 
     }
-    mpi.spawn.Rslaves()
+    # initialize an Rmpi environment
+    ns <- mpi.universe.size() - 1
+    mpi.spawn.Rslaves(nslaves=ns)
   } 
   
   if( length(path) ) {
@@ -115,7 +117,7 @@ varCombinations <- expand.grid(HiddenEffect, HiddenEffect, EffectVar, EffectVar,
 
 # If we're running with MPI, apply in parallel, otherwise apply in serial
 if(run_mpi){
-  success <- mpi.parApply(varCombinations, 1, gen_data_file, dirpath=path, job.num=20)
+  success <- mpi.parApply(varCombinations, 1, gen_data_file, dirpath=path, job.num=ns)
   mpi.close.Rslaves() 
   mpi.quit()
 } else {
