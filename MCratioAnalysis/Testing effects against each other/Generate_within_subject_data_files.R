@@ -26,10 +26,6 @@ if(length(args) > 0){
         .Call("mpi_finalize") 
       } 
     }
-    
-    mpi.spawn.Rslaves()
-    mpi.setup.rngstream(12345)
-    mpi.bcast.Robj2slave(all=TRUE)
   } 
   
   if( length(path) ) {
