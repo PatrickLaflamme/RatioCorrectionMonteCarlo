@@ -14,7 +14,7 @@ if(length(args) > 0){
   n_samples <- grep("--n_samples", args) + 1
   
   # get the number of cores
-  cores <- grep("--cores", args) + 1
+  cores <- as.numeric(grep("--cores", args) + 1)
   
   if( length(cores) ) {
     cores <- args[cores]
@@ -45,7 +45,7 @@ if(length(args) > 0){
     path <- '~/Desktop/Test/'
   }
   if( length(n_samples) ) {
-    n_samples <- args[n_samples]
+    n_samples <- as.numeric(args[n_samples])
   } else {
     stop("n_samples must be provided using --n_samples [integer]")
   }
@@ -115,7 +115,7 @@ gen_data_file <- function(varVector, dirpath, n_samples, sample_size=30, seed = 
 HiddenEffect <- c(1,2,3,4)
 EffectVar <- c(1,3,5)
 slope <-seq(0.8,1.1,1.7)
-slopeVar <- c(0.1^2,0.7^2)
+slopeVar <- c(0.2^2,0.7^2)
 HiddentEffectscorrelation <- c(0.2, 0.35)
 slopescorrelation <- c(0, 0.1)
 effectSlopecorrelation <- c(-0.35, 0, 0.35)
