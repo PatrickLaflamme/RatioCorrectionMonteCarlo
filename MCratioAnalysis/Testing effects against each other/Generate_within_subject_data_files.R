@@ -15,8 +15,6 @@ if(length(args) > 0){
   
   if( run_mpi ){
     library(Rmpi)
-    mpi.setup.rngstream(12345)
-    mpi.bcast.Robj2slave(all=TRUE)
     
     .Last <- function(){ 
       if (is.loaded("mpi_initialize")){ 
@@ -30,6 +28,8 @@ if(length(args) > 0){
     }
     
     mpi.spawn.Rslaves()
+    mpi.setup.rngstream(12345)
+    mpi.bcast.Robj2slave(all=TRUE)
   } 
   
   if( length(path) ) {
