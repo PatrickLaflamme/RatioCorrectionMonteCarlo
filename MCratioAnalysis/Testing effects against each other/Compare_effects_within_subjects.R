@@ -167,3 +167,7 @@ output$`Error Type` <- factor(output$`Error Type`, labels = c("Alpha","Beta"))
 dir.create(paste(path,"output", sep='/'), showWarnings = F)
 
 saveRDS(output, file=paste0(path, "/output/within_subjects_t_condition_", condition, ".rds"))
+
+if(run_mpi){
+  mpi.quit()
+}

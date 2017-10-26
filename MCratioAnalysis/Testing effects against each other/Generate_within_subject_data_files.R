@@ -106,6 +106,7 @@ varCombinations <- expand.grid(HiddenEffect, HiddenEffect, EffectVar, EffectVar,
 # If we're running with MPI, apply in parallel, otherwise apply in serial
 if(run_mpi){
   success <- mpi.parApply(varCombinations, 1, gen_data_file, dirpath=path)
+  mpi.quit()
 } else {
   success <- apply(varCombinations, 1, gen_data_file, dirpath=path)
 }
