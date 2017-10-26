@@ -27,7 +27,6 @@ if(length(args) > 0){
         .Call("mpi_finalize") 
       } 
     }
-    mpi.spawn.Rslaves()
   } 
   
   if( length(path) ) {
