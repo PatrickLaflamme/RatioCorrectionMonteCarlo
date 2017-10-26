@@ -13,6 +13,14 @@ if(length(args) > 0){
   # Where to save the data?
   n_samples <- grep("--n_samples", args) + 1
   
+  # get the number of cores
+  cores <- grep("--cores", args) + 1
+  
+  if( length(cores) ) {
+    cores <- args[cores]
+  } else {
+    stop("cores must be provided using --cores [integer]")
+  }
   if( run_mpi ){
     library(Rmpi)
     
@@ -27,7 +35,7 @@ if(length(args) > 0){
       } 
     }
     # initialize an Rmpi environment
-    ns <- mpi.universe.size() - 1
+    ns <- cores - 1
     mpi.spawn.Rslaves(nslaves=ns)
   } 
   
@@ -69,7 +77,7 @@ Datagen <- function(n_samples, sample_size, means,varcov, seed){
 }
 
 # create data and save to file function
-gen_data_file <- function(varVector, dirpath, n_samples=10000, sample_size=30, seed = 1234){
+gen_data_file <- function(varVector, dirpath, n_samples, sample_size=30, seed = 1234){
   
   HiddenEffectA <- varVector[1]
   HiddenEffectB <- varVector[2]
@@ -117,10 +125,10 @@ varCombinations <- expand.grid(HiddenEffect, HiddenEffect, EffectVar, EffectVar,
 
 # If we're running with MPI, apply in parallel, otherwise apply in serial
 if(run_mpi){
-  success <- mpi.parApply(varCombinations, 1, gen_data_file, dirpath=path)
+  success <- mpi.parApply(varCombinations, 1, gen_data_file, dirpath=path, n_samples=n_samples)
   mpi.close.Rslaves() 
   mpi.quit()
 } else {
-  success <- apply(varCombinations, 1, gen_data_file, dirpath=path)
+  success <- apply(varCombinations, 1, gen_data_file, dirpath=path, n_samples=n_samples)
 }
 
