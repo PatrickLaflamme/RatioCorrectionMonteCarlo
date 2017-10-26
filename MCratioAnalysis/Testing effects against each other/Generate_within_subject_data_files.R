@@ -17,6 +17,19 @@ if(length(args) > 0){
     library(Rmpi)
     mpi.setup.rngstream(12345)
     mpi.bcast.Robj2slave(all=TRUE)
+    
+    .Last <- function(){ 
+      if (is.loaded("mpi_initialize")){ 
+        if (mpi.comm.size(1) > 0){ 
+          print("Please use mpi.close.Rslaves() to close slaves.") 
+          mpi.close.Rslaves() 
+        } 
+        print("Please use mpi.quit() to quit R") 
+        .Call("mpi_finalize") 
+      } 
+    }
+    
+    mpi.spawn.Rslaves()
   } 
   
   if( length(path) ) {
@@ -106,6 +119,7 @@ varCombinations <- expand.grid(HiddenEffect, HiddenEffect, EffectVar, EffectVar,
 # If we're running with MPI, apply in parallel, otherwise apply in serial
 if(run_mpi){
   success <- mpi.parApply(varCombinations, 1, gen_data_file, dirpath=path)
+  mpi.close.Rslaves() 
   mpi.quit()
 } else {
   success <- apply(varCombinations, 1, gen_data_file, dirpath=path)

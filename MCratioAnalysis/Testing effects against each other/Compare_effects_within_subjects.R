@@ -19,6 +19,19 @@ if(length(args) > 0){
     library(Rmpi)
     mpi.setup.rngstream(12345)
     mpi.bcast.Robj2slave(all=TRUE)
+    
+    .Last <- function(){ 
+      if (is.loaded("mpi_initialize")){ 
+        if (mpi.comm.size(1) > 0){ 
+          print("Please use mpi.close.Rslaves() to close slaves.") 
+          mpi.close.Rslaves() 
+        } 
+        print("Please use mpi.quit() to quit R") 
+        .Call("mpi_finalize") 
+      } 
+    }
+    
+    mpi.spawn.Rslaves()
   } 
   
   if( length(path) ) {
@@ -169,5 +182,6 @@ dir.create(paste(path,"output", sep='/'), showWarnings = F)
 saveRDS(output, file=paste0(path, "/output/within_subjects_t_condition_", condition, ".rds"))
 
 if(run_mpi){
+  mpi.close.Rslaves() 
   mpi.quit()
 }
