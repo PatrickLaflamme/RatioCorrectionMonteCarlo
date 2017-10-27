@@ -15,7 +15,7 @@ n_samples <- 10000
 cores <- 10
 
 #condition to run
-condition <- 1
+condition <- 2
  
 library(mnormt)
 
