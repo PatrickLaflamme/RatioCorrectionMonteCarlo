@@ -16,7 +16,8 @@ cores <- 10
 
 #condition to run
 condition <- 3
- 
+
+library(Rmpi)
 library(mnormt)
 
 # data generation function
