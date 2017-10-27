@@ -6,7 +6,7 @@ args = commandArgs(trailingOnly=TRUE)
 run_mpi <- 0
 
 # Where to save the data?
-path <- "RatioCorrectionMonteCarlo/MCratioAnalysis/Testing\ effects\ against\ each\ other/Generate_within_subject_data_files.R"
+path <- "~/scratch/MCratio/condition1"
 
 # Where to save the data?
 n_samples <- 10000
