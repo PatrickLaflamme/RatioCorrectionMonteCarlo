@@ -3,7 +3,7 @@ args = commandArgs(trailingOnly=TRUE)
 
 
 # Should we run with MPI?
-run_mpi <- 1
+run_mpi <- 0
 
 # Where to save the data?
 path <- "RatioCorrectionMonteCarlo/MCratioAnalysis/Testing\ effects\ against\ each\ other/Generate_within_subject_data_files.R"
@@ -17,7 +17,6 @@ cores <- 10
 #condition to run
 condition <- 1
 
-library(Rmpi)
 library(mnormt)
 
 # data generation function
