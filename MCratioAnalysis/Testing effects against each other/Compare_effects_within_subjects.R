@@ -49,6 +49,7 @@ if(length(args) > 0){
 }
 
 library(moments)
+library(abind)
 
 # Function to generate the index values from the saved data.
 genIndex <- function(data, condition){
@@ -131,8 +132,18 @@ test_between_datasets <- function(datapath, condition){
   
   # Load and prepare data
   data <- readRDS(datapath)
-  indexA <- genIndex(data[,c(1,2),], condition)
-  indexB <- genIndex(data[,c(3,4),], condition)
+  
+  obsEffectsA <- data[,1,]*data[,2,]
+  obsEffectsB <- data[,3,]*data[,4,]
+  
+  dataA <- abind(obsEffectsA, data[,2,], along=3)
+  dataB <- abind(obsEffectsB, data[,4,], along=3)
+  
+  dataA <- aperm(dataA, c(1,3,2))
+  dataB <- aperm(dataB, c(1,3,2))
+  
+  indexA <- genIndex(dataA, condition)
+  indexB <- genIndex(dataB, condition)
   
   # Create sampling distributions for indexes
   meanDiffs <- colMeans(indexA) - colMeans(indexB)
