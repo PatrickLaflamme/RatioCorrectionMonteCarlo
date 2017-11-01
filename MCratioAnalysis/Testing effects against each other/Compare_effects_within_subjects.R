@@ -76,10 +76,7 @@ genIndex <- function(data, condition){
     indexData <- t(matrix(meanEffect/meanSlope, ncol=dim(data)[1], nrow=dim(data)[3])) * (1 + t(t(data[,1,])/meanEffect) - t(t(data[,2,])/meanSlope)) #perform the correction
   }
   else if(condition==4){
-    meanSlope <- apply(data[,2,], 2, mean) #calculate the sample mean slope
-    meanEffect <- apply(data[,1,], 2, mean) #calculate the sample mean effect
-    
-    indexData <- data[,1,] - t(matrix(meanEffect/meanSlope, ncol=dim(data)[1], nrow=dim(data)[3])) * data[,2,]
+    indexData <- data[,1,]
   }
   return(indexData)
 }
