@@ -157,7 +157,7 @@ test_between_datasets <- function(datapath, condition){
     errorType <- 1
   }
   
-  return(c(effectDiff, obsEffectDiff, obsEffectA, effectCoeffVarA, slopeCoeffVarA, obsEffectB, effectCoeffVarB, slopeCoeffVarB,  HiddenEffectscorrelation, slopescorrelation, effectSlopecorrelationA, effectSlopecorrelationB, skewDiffs, kurtosisDiffs, errorType, error))
+  return(c(effectDiff, obsEffectDiff, hidEffectA, effectCoeffVarA, slopeCoeffVarA, hidEffectB, effectCoeffVarB, slopeCoeffVarB,  HiddenEffectscorrelation, slopescorrelation, effectSlopecorrelationA, effectSlopecorrelationB, skewDiffs, kurtosisDiffs, errorType, error))
 }
 
 # List files provided in the 
