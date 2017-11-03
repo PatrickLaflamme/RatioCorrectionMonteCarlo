@@ -45,7 +45,7 @@ if(length(args) > 0){
 } else {
   run_mpi <- 0
   path <- '~/Desktop/Test/'
-  condition <- 2
+  condition <- 3
 }
 
 library(moments)
@@ -65,15 +65,15 @@ genIndex <- function(data, condition){
     indexData <- data[,1,]/data[,2,] #divide each individual effect by each individual slope
   }
   
-  else if(condition ==2){
+  else if(condition == 2){
     indexData <- t(t(data[,1,])/apply(data[,2,], 2, mean)) #divide each individual effect by the sample mean slope
   }
   
   else if (condition==3){
-    meanSlope <- apply(data[,2,], 2, mean) #calculate the sample mean slope
-    meanEffect <- apply(data[,1,], 2, mean) #calculate the sample mean effect
+    meanSlope <- aperm(array(apply(data[,2,], 2, mean), dim=c(dim(data)[3], 1, dim(data)[1])),c(3,2,1)) #calculate the sample mean slope
+    meanEffect <- aperm(array(apply(data[,1,], 2, mean), dim=c(dim(data)[3], 1, dim(data)[1])),c(3,2,1)) #calculate the sample mean effect
     
-    indexData <- t(matrix(meanEffect/meanSlope, ncol=dim(data)[1], nrow=dim(data)[3])) * (1 + t(t(data[,1,])/meanEffect) - t(t(data[,2,])/meanSlope)) #perform the correction
+    indexData <- (meanEffect/meanSlope*(1+data[,1,,drop=F]/meanEffect - data[,2,,drop=F]/meanSlope))[,1,]# perform the correction
   }
   else if(condition==4){
     indexData <- data[,1,]
@@ -120,27 +120,19 @@ test_between_datasets <- function(datapath, condition){
   slopeCoeffVarA <- varSlopeA/slopeA
   slopeCoeffVarB <- varSlopeB/slopeB
   
-  effectDiff <- effectA - effectB
+  hidEffectA <- effectA/slopeA
+  hidEffectB <- effectB/slopeB
   
-  obsEffectA <- effectA/slopeA
-  obsEffectB <- effectB/slopeB
   
-  obsEffectDiff <- obsEffectA - obsEffectB
+  effectDiff <-hidEffectA - hidEffectB
+  
+  obsEffectDiff <- effectA - effectB
   
   # Load and prepare data
   data <- readRDS(datapath)
   
-  obsEffectsA <- data[,1,]*data[,2,]
-  obsEffectsB <- data[,3,]*data[,4,]
-  
-  dataA <- abind(obsEffectsA, data[,2,], along=3)
-  dataB <- abind(obsEffectsB, data[,4,], along=3)
-  
-  dataA <- aperm(dataA, c(1,3,2))
-  dataB <- aperm(dataB, c(1,3,2))
-  
-  indexA <- genIndex(dataA, condition)
-  indexB <- genIndex(dataB, condition)
+  indexA <- genIndex(data[,c(1,2),], condition)
+  indexB <- genIndex(data[,c(3,4),], condition)
   
   # Create sampling distributions for indexes
   meanDiffs <- colMeans(indexA) - colMeans(indexB)
@@ -150,9 +142,9 @@ test_between_datasets <- function(datapath, condition){
   
   kurtosisDiffs <- kurtosis(meanDiffs)
   
-  sum_vars <- apply(indexA,2,var) + apply(indexB,2,var)
+  sum_vars <- apply(indexA,2,var) + apply(indexB,2,var) - 2*apply(abind(indexA,indexB, along = 3), 2, cov)[2,]
   
-  tValues <- meanDiffs/ (sapply(sum_vars/dim(indexA)[1],sqrt))
+  tValues <- meanDiffs / sqrt(sum_vars/dim(indexA)[1])
   
   pValues <- sapply(-abs(tValues), pt, df = dim(indexA)[1] - 2)
   
